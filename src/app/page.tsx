@@ -17,6 +17,34 @@ const GENRES = [
   "Fairy tale",
 ];
 
+function Ornament({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 200 16"
+      className={className}
+      aria-hidden="true"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M0 8 H78 M122 8 H200"
+        stroke="currentColor"
+        strokeWidth="0.8"
+        opacity="0.6"
+      />
+      <path
+        d="M82 8 Q92 2 100 8 Q108 14 118 8"
+        stroke="currentColor"
+        strokeWidth="0.9"
+        opacity="0.85"
+      />
+      <circle cx="100" cy="8" r="1.6" fill="currentColor" />
+      <circle cx="78" cy="8" r="1" fill="currentColor" opacity="0.7" />
+      <circle cx="122" cy="8" r="1" fill="currentColor" opacity="0.7" />
+    </svg>
+  );
+}
+
 export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [genre, setGenre] = useState("Fantasy");
@@ -105,43 +133,48 @@ export default function Home() {
   const currentImageError = imageErrors[activeIndex];
 
   return (
-    <div className="flex flex-1 flex-col items-center bg-zinc-50 font-sans dark:bg-zinc-950">
-      <main className="flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 py-16 sm:px-10">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+    <div className="relative z-10 flex flex-1 flex-col items-center">
+      <main className="flex w-full max-w-3xl flex-1 flex-col gap-10 px-6 py-16 sm:px-10">
+        <header className="flex flex-col items-center gap-4 text-center">
+          <span className="font-display text-xs uppercase tracking-[0.5em] text-[color:var(--color-gold-soft)]">
+            ✦  An Atlas of Imagined Worlds  ✦
+          </span>
+          <h1 className="gold-text font-display text-5xl font-bold leading-tight sm:text-6xl">
             StoryTeller
           </h1>
-          <p className="text-zinc-600 dark:text-zinc-400">
-            Describe an idea — get a four-page illustrated story.
+          <Ornament className="h-4 w-72 text-[color:var(--color-gold-soft)]" />
+          <p className="max-w-xl text-lg italic text-[color:var(--color-mist)]/80">
+            Whisper a single spark of an idea — receive a four-page illustrated
+            tale, conjured by Claude and painted by Gemini.
           </p>
         </header>
 
-        <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <section className="glass flex flex-col gap-5 rounded-2xl p-6 sm:p-8">
           <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Story idea
+            <span className="font-display text-xs uppercase tracking-[0.3em] text-[color:var(--color-gold-soft)]">
+              Story Idea
             </span>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="A retired lighthouse keeper finds a message in a bottle addressed to her younger self..."
               rows={4}
-              className="w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 outline-none transition focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-300"
+              className="input-mystic w-full resize-y rounded-lg px-4 py-3 text-base leading-relaxed"
             />
           </label>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <span className="font-display text-xs uppercase tracking-[0.3em] text-[color:var(--color-gold-soft)]">
                 Genre
               </span>
               <select
                 value={genre}
                 onChange={(e) => setGenre(e.target.value)}
-                className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-300"
+                className="input-mystic rounded-lg px-3 py-2.5 text-base"
               >
                 {GENRES.map((g) => (
-                  <option key={g} value={g}>
+                  <option key={g} value={g} className="bg-[color:var(--color-ink-2)]">
                     {g}
                   </option>
                 ))}
@@ -149,17 +182,23 @@ export default function Home() {
             </label>
 
             <label className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <span className="font-display text-xs uppercase tracking-[0.3em] text-[color:var(--color-gold-soft)]">
                 Length per page
               </span>
               <select
                 value={length}
                 onChange={(e) => setLength(e.target.value as Length)}
-                className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-300"
+                className="input-mystic rounded-lg px-3 py-2.5 text-base"
               >
-                <option value="short">Short</option>
-                <option value="medium">Medium</option>
-                <option value="long">Long</option>
+                <option value="short" className="bg-[color:var(--color-ink-2)]">
+                  Short
+                </option>
+                <option value="medium" className="bg-[color:var(--color-ink-2)]">
+                  Medium
+                </option>
+                <option value="long" className="bg-[color:var(--color-ink-2)]">
+                  Long
+                </option>
               </select>
             </label>
           </div>
@@ -167,21 +206,31 @@ export default function Home() {
           <button
             onClick={generate}
             disabled={storyLoading || !prompt.trim()}
-            className="mt-2 inline-flex h-11 items-center justify-center rounded-full bg-zinc-900 px-6 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+            className="btn-gold mt-2 inline-flex h-12 items-center justify-center gap-2 rounded-full px-8 font-display text-sm font-semibold uppercase tracking-[0.25em]"
           >
-            {storyLoading ? "Spinning the tale..." : "Generate story"}
+            {storyLoading ? (
+              <>
+                <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-current" />
+                Spinning the tale...
+              </>
+            ) : (
+              <>✦ Conjure Tale ✦</>
+            )}
           </button>
 
           {error && (
-            <p className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+            <p className="rounded-lg border border-rose-400/40 bg-rose-950/30 px-3 py-2 text-sm text-rose-200">
               {error}
             </p>
           )}
         </section>
 
         {hasStory && current && (
-          <article className="flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="relative aspect-video w-full bg-zinc-100 dark:bg-zinc-950">
+          <article
+            key={activeIndex}
+            className="parchment fade-in flex flex-col overflow-hidden rounded-2xl"
+          >
+            <div className="relative aspect-video w-full overflow-hidden bg-[color:var(--color-ink-2)]">
               {currentImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -190,7 +239,7 @@ export default function Home() {
                   className="h-full w-full object-cover"
                 />
               ) : currentImageError ? (
-                <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-4 text-center text-sm text-red-700 dark:text-red-300">
+                <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-4 text-center text-sm text-rose-200">
                   <span>Image failed: {currentImageError}</span>
                   <button
                     onClick={() => {
@@ -201,33 +250,44 @@ export default function Home() {
                       });
                       fetchImage(activeIndex, current.imagePrompt, genre);
                     }}
-                    className="rounded-full border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                    className="btn-ghost-gold rounded-full px-4 py-1 text-xs"
                   >
                     Retry
                   </button>
                 </div>
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm text-zinc-500 dark:text-zinc-400">
-                  Painting page {activeIndex + 1}...
+                <div className="shimmer flex h-full w-full items-center justify-center text-sm tracking-[0.3em] text-[color:var(--color-gold-soft)]">
+                  ✦ painting page {activeIndex + 1} ✦
                 </div>
               )}
+              <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-[color:var(--color-gold)]/30" />
             </div>
 
-            <div className="flex flex-col gap-4 p-6">
-              <p className="whitespace-pre-wrap leading-7 text-zinc-800 dark:text-zinc-200">
+            <div className="flex flex-col gap-5 p-7 sm:p-10">
+              <div className="flex items-center justify-center gap-3">
+                <span className="font-display text-[10px] uppercase tracking-[0.5em] text-[color:var(--color-gold-deep)]">
+                  Page {activeIndex + 1}
+                </span>
+              </div>
+
+              <p className="whitespace-pre-wrap font-serif-fancy text-[1.15rem] leading-8 text-[color:var(--color-parchment-ink)] first-letter:float-left first-letter:mr-2 first-letter:font-display first-letter:text-5xl first-letter:font-bold first-letter:leading-none first-letter:text-[color:var(--color-gold-deep)]">
                 {current.text}
               </p>
 
-              <div className="mt-2 flex items-center justify-between gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+              <div className="parchment-divider mt-2">
+                <span>✦</span>
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
                 <button
                   onClick={() => setActiveIndex((i) => Math.max(0, i - 1))}
                   disabled={activeIndex === 0}
-                  className="inline-flex h-9 items-center rounded-full border border-zinc-300 px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                  className="btn-ghost-gold inline-flex h-10 items-center rounded-full px-5 font-display text-xs uppercase tracking-[0.25em]"
                 >
-                  ← Previous
+                  ← Prev
                 </button>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   {pages.map((_, i) => (
                     <button
                       key={i}
@@ -235,20 +295,17 @@ export default function Home() {
                       aria-label={`Go to page ${i + 1}`}
                       className={`h-2.5 w-2.5 rounded-full transition ${
                         i === activeIndex
-                          ? "bg-zinc-900 dark:bg-zinc-100"
-                          : "bg-zinc-300 hover:bg-zinc-400 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+                          ? "bg-[color:var(--color-gold)] shadow-[0_0_10px_rgba(245,201,122,0.7)]"
+                          : "bg-[color:var(--color-parchment-shadow)]/60 hover:bg-[color:var(--color-gold-soft)]"
                       }`}
                     />
                   ))}
-                  <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
-                    Page {activeIndex + 1} of {total}
-                  </span>
                 </div>
 
                 <button
                   onClick={() => setActiveIndex((i) => Math.min(total - 1, i + 1))}
                   disabled={activeIndex === total - 1}
-                  className="inline-flex h-9 items-center rounded-full border border-zinc-300 px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                  className="btn-ghost-gold inline-flex h-10 items-center rounded-full px-5 font-display text-xs uppercase tracking-[0.25em]"
                 >
                   Next →
                 </button>
@@ -256,6 +313,10 @@ export default function Home() {
             </div>
           </article>
         )}
+
+        <footer className="mt-auto pt-8 text-center font-display text-[10px] uppercase tracking-[0.4em] text-[color:var(--color-gold-deep)]/70">
+          Forged in starlight · {new Date().getFullYear()}
+        </footer>
       </main>
     </div>
   );
