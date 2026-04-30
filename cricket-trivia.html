@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cricket Trivia Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(ellipse at top, #2d6a3a 0%, #1a4423 60%, #0e2c16 100%);
+    color: #f4f1e8;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 640px;
+    background: rgba(20, 50, 28, 0.85);
+    border: 2px solid #c9b97a;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04);
+    backdrop-filter: blur(8px);
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 2px dashed #c9b97a;
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+  }
+
+  .title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #fff8d6;
+    text-shadow: 0 2px 0 #0a2412;
+  }
+  .title .ball {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background: #b13a2a;
+    border-radius: 50%;
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.25), 0 0 0 2px #fff8d6;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  .stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+  }
+  .pill {
+    background: #0e2c16;
+    border: 1px solid #c9b97a;
+    color: #fff8d6;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .pill.timer.warn { background: #6a2a1a; border-color: #ffb199; color: #ffe5d9; }
+
+  .progress {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .progress > span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #f6d365, #fda085);
+    width: 0%;
+    transition: width 0.25s ease;
+  }
+
+  .question {
+    font-size: 19px;
+    line-height: 1.4;
+    font-weight: 600;
+    margin-bottom: 16px;
+    min-height: 60px;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  @media (min-width: 520px) {
+    .options { grid-template-columns: 1fr 1fr; }
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    background: #f4f1e8;
+    color: #1a3a22;
+    border: 2px solid #c9b97a;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.08s ease, background 0.2s, border-color 0.2s, color 0.2s;
+    min-height: 56px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .option:hover:not(:disabled) { background: #fff8d6; }
+  .option:active:not(:disabled) { transform: scale(0.98); }
+  .option:disabled { cursor: not-allowed; }
+
+  .option .badge {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #1a3a22;
+    color: #fff8d6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+  }
+
+  .option.correct {
+    background: #2e7d3a;
+    border-color: #aef0b9;
+    color: #fff;
+  }
+  .option.correct .badge { background: #fff8d6; color: #1a3a22; }
+
+  .option.wrong {
+    background: #b13a2a;
+    border-color: #ffd2c7;
+    color: #fff;
+  }
+  .option.wrong .badge { background: #fff8d6; color: #b13a2a; }
+
+  .feedback {
+    margin-top: 14px;
+    min-height: 28px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .feedback.correct { color: #aef0b9; }
+  .feedback.wrong { color: #ffd2c7; }
+
+  .next-btn, .play-again-btn, .start-btn {
+    display: block;
+    margin: 14px auto 0;
+    background: #c9b97a;
+    color: #1a3a22;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 800;
+    border-radius: 999px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: transform 0.08s ease, background 0.2s;
+    min-height: 48px;
+  }
+  .next-btn:hover, .play-again-btn:hover, .start-btn:hover { background: #fff8d6; }
+  .next-btn:active, .play-again-btn:active, .start-btn:active { transform: scale(0.97); }
+
+  .hidden { display: none !important; }
+
+  /* Results */
+  .results {
+    text-align: center;
+    padding: 12px 0;
+  }
+  .results h2 {
+    font-size: 26px;
+    color: #fff8d6;
+    margin-bottom: 12px;
+  }
+  .score-big {
+    font-size: 64px;
+    font-weight: 900;
+    color: #c9b97a;
+    line-height: 1;
+    margin: 12px 0;
+    text-shadow: 0 4px 0 #0a2412;
+  }
+  .score-big small { font-size: 28px; color: #f4f1e8; }
+  .results-msg {
+    font-size: 17px;
+    margin-bottom: 8px;
+    color: #f4f1e8;
+  }
+
+  /* Start screen */
+  .start-screen { text-align: center; padding: 12px 4px; }
+  .start-screen h2 { font-size: 22px; color: #fff8d6; margin-bottom: 10px; }
+  .start-screen p { color: #d8d2bf; font-size: 15px; line-height: 1.5; margin-bottom: 6px; }
+
+  /* Pitch stripe accent */
+  .pitch-stripe {
+    height: 8px;
+    background: repeating-linear-gradient(90deg,
+      #6a8e3a 0 24px, #5a7e2a 24px 48px);
+    border-radius: 4px;
+    margin: 16px 0;
+    border: 1px solid #2d4a18;
+  }
+</style>
+</head>
+<body>
+  <main class="app" id="app">
+    <header class="header">
+      <div class="title"><span class="ball" aria-hidden="true"></span>Cricket Trivia</div>
+      <div class="stats">
+        <div class="pill" id="scorePill">Score: 0</div>
+        <div class="pill" id="qPill">Q 1 / 10</div>
+        <div class="pill timer" id="timerPill">15s</div>
+      </div>
+    </header>
+
+    <div class="progress"><span id="progressBar"></span></div>
+
+    <!-- Start screen -->
+    <section id="startScreen" class="start-screen">
+      <h2>Ready to face the spin?</h2>
+      <p>10 questions. 15 seconds each. One innings — make it count.</p>
+      <div class="pitch-stripe" aria-hidden="true"></div>
+      <button class="start-btn" id="startBtn">Start Quiz</button>
+    </section>
+
+    <!-- Quiz screen -->
+    <section id="quizScreen" class="hidden">
+      <div class="question" id="questionText"></div>
+      <div class="options" id="optionsGrid"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn hidden" id="nextBtn">Next</button>
+    </section>
+
+    <!-- Results screen -->
+    <section id="resultsScreen" class="hidden results">
+      <h2>Innings Complete!</h2>
+      <div class="pitch-stripe" aria-hidden="true"></div>
+      <div class="score-big"><span id="finalScore">0</span><small> / 10</small></div>
+      <div class="results-msg" id="resultsMsg"></div>
+      <button class="play-again-btn" id="playAgainBtn">Play Again</button>
+    </section>
+  </main>
+
+<script>
+(function () {
+  "use strict";
+
+  const QUESTIONS = [
+    {
+      q: "Which country won the first Cricket World Cup in 1975?",
+      options: ["England", "Australia", "West Indies", "India"],
+      answer: 2
+    },
+    {
+      q: "Who holds the record for the highest individual score in Test cricket (400*)?",
+      options: ["Brian Lara", "Sachin Tendulkar", "Don Bradman", "Virender Sehwag"],
+      answer: 0
+    },
+    {
+      q: "Which bowler has taken the most wickets in ODI history?",
+      options: ["Muttiah Muralitharan", "Wasim Akram", "Glenn McGrath", "Anil Kumble"],
+      answer: 0
+    },
+    {
+      q: "The Ashes series is played between which two nations?",
+      options: ["India & Pakistan", "Australia & South Africa", "England & Australia", "New Zealand & England"],
+      answer: 2
+    },
+    {
+      q: "Who was the first batsman to score a double century in ODI cricket?",
+      options: ["Rohit Sharma", "Sachin Tendulkar", "Chris Gayle", "Virender Sehwag"],
+      answer: 1
+    },
+    {
+      q: "Which stadium is known as the Home of Cricket?",
+      options: ["Eden Gardens", "MCG", "Lord's", "The Oval"],
+      answer: 2
+    },
+    {
+      q: "Which player has the most Player of the Tournament awards in ICC World Cups?",
+      options: ["Virat Kohli", "Shakib Al Hasan", "David Warner", "Glenn Maxwell"],
+      answer: 1
+    },
+    {
+      q: "Which team has played the most ICC World Cup finals?",
+      options: ["Australia", "England", "New Zealand", "India"],
+      answer: 0
+    },
+    {
+      q: "What is the maximum overs a bowler can bowl in a T20 match?",
+      options: ["2", "4", "5", "3"],
+      answer: 1
+    },
+    {
+      q: "Which cricketer took a hat-trick in two consecutive World Cups (2003 & 2007)?",
+      options: ["Brett Lee", "Makhaya Ntini", "Lasith Malinga", "Shaun Pollock"],
+      answer: 2
+    }
+  ];
+
+  const TIME_LIMIT = 15;
+  const LETTERS = ["A", "B", "C", "D"];
+
+  // ---------- State ----------
+  let currentIdx = 0;
+  let score = 0;
+  let timer = null;
+  let timeLeft = TIME_LIMIT;
+  let locked = false; // prevents double-answers
+
+  // ---------- Elements ----------
+  const $ = (id) => document.getElementById(id);
+  const startScreen = $("startScreen");
+  const quizScreen = $("quizScreen");
+  const resultsScreen = $("resultsScreen");
+  const startBtn = $("startBtn");
+  const playAgainBtn = $("playAgainBtn");
+  const nextBtn = $("nextBtn");
+  const questionText = $("questionText");
+  const optionsGrid = $("optionsGrid");
+  const feedback = $("feedback");
+  const scorePill = $("scorePill");
+  const qPill = $("qPill");
+  const timerPill = $("timerPill");
+  const progressBar = $("progressBar");
+  const finalScore = $("finalScore");
+  const resultsMsg = $("resultsMsg");
+
+  // ---------- Audio (Web Audio API) ----------
+  let audioCtx = null;
+  function getCtx() {
+    if (!audioCtx) {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) audioCtx = new Ctx();
+    }
+    if (audioCtx && audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  // White-noise buffer used for crowd-like textures
+  function makeNoiseBuffer(ctx, durationSec) {
+    const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * durationSec), ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    return buf;
+  }
+
+  // Crowd cheer: filtered noise swelling up + bright chord on top
+  function playCheer() {
+    const ctx = getCtx();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const dur = 1.6;
+
+    // Crowd noise layer
+    const noise = ctx.createBufferSource();
+    noise.buffer = makeNoiseBuffer(ctx, dur);
+
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 1200;
+    bp.Q.value = 0.7;
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.0001, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.55, now + 0.25);
+    noiseGain.gain.exponentialRampToValueAtTime(0.35, now + 0.9);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+    noise.connect(bp).connect(noiseGain).connect(ctx.destination);
+    noise.start(now);
+    noise.stop(now + dur);
+
+    // Bright triad to feel celebratory (C major: C5, E5, G5)
+    const freqs = [523.25, 659.25, 783.99];
+    freqs.forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(f, now);
+      // Slight upward gliss for excitement
+      osc.frequency.exponentialRampToValueAtTime(f * 1.05, now + 0.6);
+
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(0.16, now + 0.08 + i * 0.04);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+      osc.connect(g).connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 1.3);
+    });
+
+    // A few "whistle" chirps in the crowd
+    for (let i = 0; i < 3; i++) {
+      const t0 = now + 0.15 + Math.random() * 0.7;
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = "sine";
+      const startF = 1800 + Math.random() * 600;
+      osc.frequency.setValueAtTime(startF, t0);
+      osc.frequency.exponentialRampToValueAtTime(startF * 1.4, t0 + 0.18);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.07, t0 + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.3);
+      osc.connect(g).connect(ctx.destination);
+      osc.start(t0);
+      osc.stop(t0 + 0.35);
+    }
+  }
+
+  // Crowd groan / "awww": low filtered noise that descends, plus a downward minor sigh
+  function playGroan() {
+    const ctx = getCtx();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const dur = 1.4;
+
+    // Low noise crowd
+    const noise = ctx.createBufferSource();
+    noise.buffer = makeNoiseBuffer(ctx, dur);
+
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.setValueAtTime(800, now);
+    lp.frequency.exponentialRampToValueAtTime(220, now + dur);
+    lp.Q.value = 0.6;
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.0001, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.45, now + 0.2);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+    noise.connect(lp).connect(noiseGain).connect(ctx.destination);
+    noise.start(now);
+    noise.stop(now + dur);
+
+    // Descending "awww" voice — two oscillators a minor third apart, sliding down
+    const sigh = (startFreq, endFreq, gainPeak, delay) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = "sawtooth";
+      const t0 = now + delay;
+      osc.frequency.setValueAtTime(startFreq, t0);
+      osc.frequency.exponentialRampToValueAtTime(endFreq, t0 + 1.0);
+
+      const lp2 = ctx.createBiquadFilter();
+      lp2.type = "lowpass";
+      lp2.frequency.value = 900;
+
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(gainPeak, t0 + 0.15);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.2);
+
+      osc.connect(lp2).connect(g).connect(ctx.destination);
+      osc.start(t0);
+      osc.stop(t0 + 1.3);
+    };
+    // Like an "ohhh" — A3 down to E3 + minor third on top
+    sigh(220.00, 164.81, 0.10, 0.05); // A3 -> E3
+    sigh(261.63, 196.00, 0.08, 0.05); // C4 -> G3
+  }
+
+  // ---------- Render ----------
+  function renderQuestion() {
+    const item = QUESTIONS[currentIdx];
+    locked = false;
+    feedback.textContent = "";
+    feedback.className = "feedback";
+    nextBtn.classList.add("hidden");
+
+    questionText.textContent = item.q;
+    qPill.textContent = `Q ${currentIdx + 1} / ${QUESTIONS.length}`;
+    progressBar.style.width = `${(currentIdx / QUESTIONS.length) * 100}%`;
+
+    optionsGrid.innerHTML = "";
+    item.options.forEach((opt, i) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "option";
+      btn.setAttribute("data-index", String(i));
+      btn.innerHTML = `<span class="badge">${LETTERS[i]}</span><span>${opt}</span>`;
+      btn.addEventListener("click", () => onAnswer(i));
+      optionsGrid.appendChild(btn);
+    });
+
+    startTimer();
+  }
+
+  function updateScore() {
+    scorePill.textContent = `Score: ${score}`;
+  }
+
+  // ---------- Timer ----------
+  function startTimer() {
+    clearInterval(timer);
+    timeLeft = TIME_LIMIT;
+    paintTimer();
+    timer = setInterval(() => {
+      timeLeft -= 1;
+      paintTimer();
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        if (!locked) {
+          // Time's up: mark wrong, no selection
+          handleTimeout();
+        }
+      }
+    }, 1000);
+  }
+
+  function paintTimer() {
+    timerPill.textContent = `${timeLeft}s`;
+    if (timeLeft <= 5) timerPill.classList.add("warn");
+    else timerPill.classList.remove("warn");
+  }
+
+  function stopTimer() {
+    clearInterval(timer);
+  }
+
+  // ---------- Answering ----------
+  function onAnswer(selectedIdx) {
+    if (locked) return;
+    locked = true;
+    stopTimer();
+
+    const correctIdx = QUESTIONS[currentIdx].answer;
+    const buttons = optionsGrid.querySelectorAll(".option");
+    buttons.forEach((b, i) => {
+      b.disabled = true;
+      if (i === correctIdx) b.classList.add("correct");
+      if (i === selectedIdx && i !== correctIdx) b.classList.add("wrong");
+    });
+
+    if (selectedIdx === correctIdx) {
+      score += 1;
+      updateScore();
+      feedback.textContent = "Howzat! Correct.";
+      feedback.classList.add("correct");
+      playCheer();
+    } else {
+      const correctText = QUESTIONS[currentIdx].options[correctIdx];
+      feedback.textContent = `Bowled out! Answer: ${LETTERS[correctIdx]}) ${correctText}`;
+      feedback.classList.add("wrong");
+      playGroan();
+    }
+
+    nextBtn.textContent = currentIdx === QUESTIONS.length - 1 ? "See Results" : "Next";
+    nextBtn.classList.remove("hidden");
+  }
+
+  function handleTimeout() {
+    locked = true;
+    const correctIdx = QUESTIONS[currentIdx].answer;
+    const buttons = optionsGrid.querySelectorAll(".option");
+    buttons.forEach((b, i) => {
+      b.disabled = true;
+      if (i === correctIdx) b.classList.add("correct");
+    });
+    feedback.textContent = `Time up! Answer: ${LETTERS[correctIdx]}) ${QUESTIONS[currentIdx].options[correctIdx]}`;
+    feedback.classList.add("wrong");
+    playGroan();
+    nextBtn.textContent = currentIdx === QUESTIONS.length - 1 ? "See Results" : "Next";
+    nextBtn.classList.remove("hidden");
+  }
+
+  function next() {
+    if (currentIdx < QUESTIONS.length - 1) {
+      currentIdx += 1;
+      renderQuestion();
+    } else {
+      showResults();
+    }
+  }
+
+  // ---------- Results ----------
+  function showResults() {
+    stopTimer();
+    quizScreen.classList.add("hidden");
+    resultsScreen.classList.remove("hidden");
+    progressBar.style.width = "100%";
+    finalScore.textContent = String(score);
+
+    let msg;
+    if (score === 10) msg = "Century! A flawless innings.";
+    else if (score >= 8) msg = "Top of the order — superb knock!";
+    else if (score >= 6) msg = "A solid partnership at the crease.";
+    else if (score >= 4) msg = "Held the bat — but the spin got tricky.";
+    else if (score >= 2) msg = "Tail-ender effort — back to the nets!";
+    else msg = "Golden duck. Pad up and try again!";
+    resultsMsg.textContent = msg;
+  }
+
+  // ---------- Flow ----------
+  function startQuiz() {
+    // First user gesture: unlock audio context
+    getCtx();
+
+    currentIdx = 0;
+    score = 0;
+    updateScore();
+
+    startScreen.classList.add("hidden");
+    resultsScreen.classList.add("hidden");
+    quizScreen.classList.remove("hidden");
+
+    renderQuestion();
+  }
+
+  function playAgain() {
+    // Reset everything
+    stopTimer();
+    currentIdx = 0;
+    score = 0;
+    updateScore();
+    progressBar.style.width = "0%";
+    timerPill.classList.remove("warn");
+    timerPill.textContent = `${TIME_LIMIT}s`;
+
+    resultsScreen.classList.add("hidden");
+    quizScreen.classList.remove("hidden");
+    renderQuestion();
+  }
+
+  // Wire up
+  startBtn.addEventListener("click", startQuiz);
+  playAgainBtn.addEventListener("click", playAgain);
+  nextBtn.addEventListener("click", next);
+
+  // Initial paint of stat pills
+  updateScore();
+  qPill.textContent = `Q 1 / ${QUESTIONS.length}`;
+  timerPill.textContent = `${TIME_LIMIT}s`;
+})();
+</script>
+</body>
+</html>
