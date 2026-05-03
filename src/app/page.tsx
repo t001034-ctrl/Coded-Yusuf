@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Length = "short" | "medium" | "long";
 
@@ -58,12 +58,122 @@ export default function Home() {
   const [storyLoading, setStoryLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Audio narration
+  const [audioUrls, setAudioUrls] = useState<(string | null)[]>([]);
+  const [audioLoading, setAudioLoading] = useState<boolean[]>([]);
+  const [audioPlaying, setAudioPlaying] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  function clearAudioCache(urls: (string | null)[]) {
+    urls.forEach((u) => {
+      if (u) URL.revokeObjectURL(u);
+    });
+  }
+
+  function stopAudio() {
+    const el = audioRef.current;
+    if (el) {
+      el.pause();
+      el.currentTime = 0;
+    }
+    setAudioPlaying(false);
+  }
+
   function reset() {
+    stopAudio();
+    clearAudioCache(audioUrls);
     setPages([]);
     setImages([]);
     setImageErrors([]);
+    setAudioUrls([]);
+    setAudioLoading([]);
+    setAudioError(null);
     setActiveIndex(0);
     setError(null);
+  }
+
+  // Stop playback whenever the user flips to another page
+  useEffect(() => {
+    stopAudio();
+    setAudioError(null);
+  }, [activeIndex]);
+
+  // Cleanup blob URLs when unmounting
+  useEffect(() => {
+    return () => {
+      clearAudioCache(audioUrls);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function narrateCurrent() {
+    if (!current) return;
+    setAudioError(null);
+
+    // If already cached, just play
+    const existing = audioUrls[activeIndex];
+    if (existing && audioRef.current) {
+      audioRef.current.src = existing;
+      try {
+        await audioRef.current.play();
+        setAudioPlaying(true);
+      } catch (err) {
+        setAudioError(err instanceof Error ? err.message : "Playback error");
+      }
+      return;
+    }
+
+    setAudioLoading((prev) => {
+      const next = [...prev];
+      next[activeIndex] = true;
+      return next;
+    });
+
+    try {
+      const res = await fetch("/api/narrate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: current.text, genre }),
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setAudioError(data.error ?? `Narration failed (${res.status}).`);
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      setAudioUrls((prev) => {
+        const next = [...prev];
+        next[activeIndex] = url;
+        return next;
+      });
+      if (audioRef.current) {
+        audioRef.current.src = url;
+        try {
+          await audioRef.current.play();
+          setAudioPlaying(true);
+        } catch (err) {
+          setAudioError(err instanceof Error ? err.message : "Playback error");
+        }
+      }
+    } catch (err) {
+      setAudioError(err instanceof Error ? err.message : "Network error");
+    } finally {
+      setAudioLoading((prev) => {
+        const next = [...prev];
+        next[activeIndex] = false;
+        return next;
+      });
+    }
+  }
+
+  function toggleNarration() {
+    if (audioPlaying) {
+      stopAudio();
+    } else {
+      narrateCurrent();
+    }
   }
 
   async function fetchImage(index: number, imagePrompt: string, genreLabel: string) {
@@ -116,6 +226,8 @@ export default function Home() {
       setPages(data.pages);
       setImages(new Array(data.pages.length).fill(null));
       setImageErrors(new Array(data.pages.length).fill(null));
+      setAudioUrls(new Array(data.pages.length).fill(null));
+      setAudioLoading(new Array(data.pages.length).fill(false));
       data.pages.forEach((p, i) => {
         fetchImage(i, p.imagePrompt, genre);
       });
@@ -276,6 +388,37 @@ export default function Home() {
 
               <div className="parchment-divider mt-2">
                 <span>✦</span>
+              </div>
+
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  onClick={toggleNarration}
+                  disabled={audioLoading[activeIndex]}
+                  className="inline-flex h-9 items-center gap-2 rounded-full border border-[color:var(--color-gold-deep)]/40 bg-[color:var(--color-gold)]/10 px-4 font-display text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-gold-deep)] transition hover:bg-[color:var(--color-gold)]/20 disabled:cursor-wait disabled:opacity-60"
+                >
+                  {audioLoading[activeIndex] ? (
+                    <>
+                      <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-current" />
+                      Summoning voice...
+                    </>
+                  ) : audioPlaying ? (
+                    <>■ Stop</>
+                  ) : audioUrls[activeIndex] ? (
+                    <>▶ Replay narration</>
+                  ) : (
+                    <>♪ Listen</>
+                  )}
+                </button>
+                <audio
+                  ref={audioRef}
+                  onEnded={() => setAudioPlaying(false)}
+                  onPause={() => setAudioPlaying(false)}
+                  onPlay={() => setAudioPlaying(true)}
+                  className="hidden"
+                />
+                {audioError && (
+                  <p className="text-xs text-rose-700">{audioError}</p>
+                )}
               </div>
 
               <div className="flex items-center justify-between gap-3">

@@ -10,6 +10,25 @@ const LENGTH_TOKENS = {
   long: 4000,
 } as const;
 
+const GENRE_VOICE: Record<string, string> = {
+  fantasy:
+    "Lush, sensory, mythic cadence. Reach for slightly archaic, image-rich vocabulary. Name places, lineages, and small details that imply a wider world. Slow the rhythm at moments of wonder.",
+  "sci-fi":
+    "Precise and technical, cool in tone. Reveal the world through plausible jargon and offhand specifics rather than explanation. Let unfamiliar tech feel ordinary to the characters; let the reader catch up.",
+  mystery:
+    "Withhold. Observe rather than explain. Let unease leak through ordinary details — a pause, an absence, the wrong silence. Foreshadow without naming. Trust the reader to assemble the picture.",
+  horror:
+    "Short, tight sentences. Build dread through sensory specifics — texture, smell, breath, threshold. Restraint over gore. Use white space and what is *not* shown. Minimize dialogue.",
+  romance:
+    "Render interior emotion in fine grain. Slow time at pivotal moments. Use warm sensory intimacy — touch, gaze, breath, the specific weight of words spoken and unspoken.",
+  adventure:
+    "Kinetic verbs, forward momentum. Choreograph action with clarity — what moves, what fails, what holds. Cut quickly between beats. Reward the reader with vivid set-pieces.",
+  comedy:
+    "Rhythm-based humor through specific absurdity and surprise reversals. Dry observation; the world stays straight while behaving strangely. Trust the punchlines to land without commentary.",
+  "fairy tale":
+    "Classical incantatory cadence ('Once upon a time...', 'It came to pass...'). Use repetition of threes, archetypal figures, and a gentle moral undertone. Plain, ringing language.",
+};
+
 type Length = keyof typeof LENGTH_TOKENS;
 
 type StoryRequest = {
@@ -83,6 +102,10 @@ export async function POST(request: Request) {
     length === "short" ? "100-150" : length === "long" ? "300-400" : "180-250";
   const model = process.env.OPENROUTER_STORY_MODEL || "anthropic/claude-sonnet-4.5";
 
+  const voiceGuidance =
+    GENRE_VOICE[genre.toLowerCase()] ??
+    "Match prose style to the genre: distinct voice, vivid sensory detail, tight pacing.";
+
   const systemPrompt = `You are StoryTeller, an imaginative author who writes short illustrated stories.
 You always reply with strict JSON matching this exact schema and nothing else:
 {
@@ -100,7 +123,11 @@ Rules:
 - "text" is the prose for that page (${wordsPerPage} words). Vivid, sensory, no headings, no scene labels, no "Page 1:" prefixes.
 - "imagePrompt" is a concrete visual description for an illustrator (subject, setting, mood, lighting, style). 1-2 sentences. No text or words to render in the image.
 - Maintain consistent characters and setting across pages so illustrations match.
-- Output only the JSON object — no preamble, no markdown fences.`;
+- Output only the JSON object — no preamble, no markdown fences.
+
+Narrative voice for genre "${genre}":
+${voiceGuidance}
+Commit to this voice throughout all four pages. Do not flatten into generic prose.`;
 
   try {
     const upstream = await fetch(OPENROUTER_URL, {
