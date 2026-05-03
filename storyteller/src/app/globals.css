@@ -1,0 +1,227 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-ink: #0a0716;
+  --color-ink-2: #150c2e;
+  --color-ink-3: #221547;
+  --color-gold: #f5c97a;
+  --color-gold-soft: #d9a85b;
+  --color-gold-deep: #8a6420;
+  --color-mist: #d6c9ff;
+  --color-parchment: #f4e8cf;
+  --color-parchment-shadow: #c8b78d;
+  --color-parchment-ink: #2a200f;
+  --font-display: var(--font-display);
+  --font-serif: var(--font-serif);
+}
+
+html,
+body {
+  background: #050310;
+  color: var(--color-mist);
+}
+
+body {
+  font-family: var(--font-serif), Georgia, serif;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(126, 73, 255, 0.25), transparent 55%),
+    radial-gradient(ellipse at 85% 15%, rgba(255, 197, 122, 0.16), transparent 55%),
+    radial-gradient(ellipse at 50% 110%, rgba(60, 30, 140, 0.45), transparent 65%),
+    linear-gradient(180deg, #050310 0%, #0a0716 50%, #050210 100%);
+  background-attachment: fixed;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::before {
+  background-image:
+    radial-gradient(1px 1px at 12% 22%, #fff8, transparent),
+    radial-gradient(1px 1px at 28% 64%, #fff7, transparent),
+    radial-gradient(1px 1px at 41% 12%, #fff9, transparent),
+    radial-gradient(1.5px 1.5px at 55% 80%, #fffa, transparent),
+    radial-gradient(1px 1px at 68% 44%, #fff6, transparent),
+    radial-gradient(1px 1px at 79% 16%, #fff8, transparent),
+    radial-gradient(1.5px 1.5px at 88% 70%, #fff8, transparent),
+    radial-gradient(1px 1px at 7% 88%, #fff7, transparent),
+    radial-gradient(1px 1px at 92% 32%, #fff9, transparent),
+    radial-gradient(1px 1px at 33% 92%, #fff7, transparent);
+  background-size: 100% 100%;
+  animation: twinkle 6s ease-in-out infinite alternate;
+}
+
+body::after {
+  background-image:
+    radial-gradient(1px 1px at 18% 35%, #f5c97a99, transparent),
+    radial-gradient(1px 1px at 47% 28%, #d6c9ff99, transparent),
+    radial-gradient(1px 1px at 73% 58%, #f5c97a88, transparent),
+    radial-gradient(1.5px 1.5px at 83% 24%, #fffa, transparent),
+    radial-gradient(1px 1px at 24% 76%, #d6c9ff88, transparent);
+  background-size: 100% 100%;
+  animation: twinkle 4.5s ease-in-out infinite alternate-reverse;
+  opacity: 0.85;
+}
+
+@keyframes twinkle {
+  0%   { opacity: 0.45; transform: translateY(0); }
+  50%  { opacity: 1;    transform: translateY(-2px); }
+  100% { opacity: 0.6;  transform: translateY(0); }
+}
+
+.font-display {
+  font-family: var(--font-display), "Trajan Pro", serif;
+  letter-spacing: 0.04em;
+}
+
+.font-serif-fancy {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+.gold-text {
+  background: linear-gradient(180deg, #fff2c2 0%, #f5c97a 45%, #d9a85b 75%, #8a6420 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 30px rgba(245, 201, 122, 0.18);
+}
+
+.gold-glow {
+  box-shadow:
+    0 0 0 1px rgba(245, 201, 122, 0.35),
+    0 0 24px rgba(245, 201, 122, 0.18),
+    0 10px 40px rgba(0, 0, 0, 0.45);
+}
+
+.glass {
+  background: rgba(15, 9, 38, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(245, 201, 122, 0.22);
+}
+
+.parchment {
+  background:
+    radial-gradient(ellipse at 50% 0%, #fbf1d6 0%, #f4e8cf 40%, #e8d8ad 100%);
+  color: var(--color-parchment-ink);
+  box-shadow:
+    inset 0 0 60px rgba(138, 100, 32, 0.18),
+    0 0 0 1px rgba(245, 201, 122, 0.35),
+    0 30px 60px rgba(0, 0, 0, 0.5);
+}
+
+.parchment-divider {
+  position: relative;
+  text-align: center;
+  height: 24px;
+}
+
+.parchment-divider::before,
+.parchment-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 38%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(138, 100, 32, 0.5) 50%,
+    transparent
+  );
+}
+
+.parchment-divider::before { left: 0; }
+.parchment-divider::after { right: 0; }
+
+.parchment-divider span {
+  display: inline-block;
+  font-size: 14px;
+  color: rgba(138, 100, 32, 0.7);
+  background: transparent;
+}
+
+.btn-gold {
+  background: linear-gradient(180deg, #fbe2a3 0%, #f5c97a 45%, #d9a85b 100%);
+  color: #2a1a05;
+  border: 1px solid #b88a3a;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 6px 18px rgba(245, 201, 122, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.btn-gold:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 10px 28px rgba(245, 201, 122, 0.4);
+}
+
+.btn-gold:disabled {
+  filter: grayscale(0.4) brightness(0.7);
+  cursor: not-allowed;
+}
+
+.btn-ghost-gold {
+  background: rgba(245, 201, 122, 0.06);
+  border: 1px solid rgba(245, 201, 122, 0.35);
+  color: #f5c97a;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.btn-ghost-gold:hover:not(:disabled) {
+  background: rgba(245, 201, 122, 0.12);
+  border-color: rgba(245, 201, 122, 0.55);
+}
+.btn-ghost-gold:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.input-mystic {
+  background: rgba(8, 4, 24, 0.6);
+  color: #f3eaff;
+  border: 1px solid rgba(214, 201, 255, 0.18);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input-mystic::placeholder {
+  color: rgba(214, 201, 255, 0.4);
+  font-style: italic;
+}
+.input-mystic:focus {
+  outline: none;
+  border-color: rgba(245, 201, 122, 0.55);
+  box-shadow: 0 0 0 3px rgba(245, 201, 122, 0.15);
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(245, 201, 122, 0.05) 0%,
+    rgba(245, 201, 122, 0.18) 50%,
+    rgba(245, 201, 122, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.5s linear infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
