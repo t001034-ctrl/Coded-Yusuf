@@ -1,6 +1,8 @@
 import { OPENROUTER_URL, openRouterHeaders } from "@/lib/openrouter";
 
 export const runtime = "nodejs";
+// Image generation can take 10-30s.
+export const maxDuration = 60;
 
 type ImageRequest = {
   prompt?: string;

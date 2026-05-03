@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# StoryTeller
 
-## Getting Started
+A four-page illustrated storybook generator. Describe an idea, pick a genre, and get back a story written by Claude (with genre-tuned narrative voice), illustrated by Gemini Flash Image, and narrated by ElevenLabs.
 
-First, run the development server:
+Built with Next.js 16 (App Router) + Tailwind 4 + TypeScript.
+
+## Stack
+
+- **Story** — `anthropic/claude-sonnet-4.5` via OpenRouter, JSON output of 4 narrative beats
+- **Images** — `google/gemini-2.5-flash-image` via OpenRouter, one illustration per page
+- **Narration** — ElevenLabs TTS with a different default voice + tuned settings per genre
+- **UI** — Cosmic + parchment fantasy theme (Cinzel + Cormorant Garamond), animated starfield, drop-cap parchment pages, page-flip transitions
+
+## Local development
 
 ```bash
+npm install
+cp .env.local.example .env.local   # then fill in your keys
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable                  | Required | Default                                |
+| ------------------------- | -------- | -------------------------------------- |
+| `OPENROUTER_API_KEY`      | yes      | —                                      |
+| `OPENROUTER_STORY_MODEL`  | no       | `anthropic/claude-sonnet-4.5`          |
+| `OPENROUTER_IMAGE_MODEL`  | no       | `google/gemini-2.5-flash-image`        |
+| `ELEVENLABS_API_KEY`      | yes      | —                                      |
+| `ELEVENLABS_MODEL`        | no       | `eleven_multilingual_v2`               |
 
-## Learn More
+Get keys from https://openrouter.ai/keys and https://elevenlabs.io/app/settings/api-keys. The ElevenLabs key needs `text_to_speech` permission enabled.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy to Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This project lives in the `storyteller/` subfolder of a multi-project repo. When importing into Vercel:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Go to https://vercel.com/new and **Import Git Repository** → pick this repo.
+2. **Root Directory:** click *Edit* and set it to `storyteller`. (Vercel will then auto-detect Next.js.)
+3. **Environment Variables:** add the five variables from the table above (paste your real keys).
+4. Click **Deploy**.
 
-## Deploy on Vercel
+The first build takes ~2 minutes. Subsequent pushes to `main` auto-deploy.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+> **Function timeouts:** the story / image / narrate routes have `export const maxDuration = 60` so generation has room to finish on Vercel's Hobby plan.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project layout
+
+```
+storyteller/
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── story/route.ts     # Claude → 4-page JSON
+│   │   │   ├── image/route.ts     # Gemini → PNG per page
+│   │   │   └── narrate/route.ts   # ElevenLabs → MP3 per page
+│   │   ├── layout.tsx
+│   │   ├── page.tsx               # Reader UI
+│   │   └── globals.css
+│   └── lib/openrouter.ts
+└── public/
+```

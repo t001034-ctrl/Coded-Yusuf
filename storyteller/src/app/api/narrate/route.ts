@@ -1,4 +1,6 @@
 export const runtime = "nodejs";
+// TTS can take up to ~30s for longer pages.
+export const maxDuration = 60;
 
 type NarrateRequest = {
   text?: string;

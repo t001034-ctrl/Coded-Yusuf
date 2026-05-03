@@ -1,6 +1,8 @@
 import { OPENROUTER_URL, openRouterHeaders } from "@/lib/openrouter";
 
 export const runtime = "nodejs";
+// 4-page JSON generation can take 40-60s. Vercel Hobby caps at 60s.
+export const maxDuration = 60;
 
 const PAGE_COUNT = 4;
 
